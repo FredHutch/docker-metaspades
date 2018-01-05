@@ -1,6 +1,8 @@
 # docker-metaspades
 Docker image running metaSPAdes
 
+[![Docker Repository on Quay](https://quay.io/repository/fhcrc-microbiome/metaspades/status "Docker Repository on Quay")](https://quay.io/repository/fhcrc-microbiome/metaspades)
+
 The purpose of this repository is to build a Docker image running metaSPAdes.
 It will also contain a wrapper script that will be included within the Docker image
 that will make it more convenient to run within an HPC (e.g. Slurm) or 'cloud'
