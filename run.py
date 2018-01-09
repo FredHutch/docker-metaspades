@@ -331,17 +331,15 @@ def run_metaspades(input_str,
     # Read in the logs
     logging.info("Reading in the logs")
     logs = open(log_fp, 'rt').readlines()
-    spades_logs = {
-        "logs": open(
-            os.path.join(temp_folder, "spades.log"), "rt"
-            ).readlines(),
-        "params": open(
-            os.path.join(temp_folder, "params.txt"), "rt"
-            ).readlines(),
-        "warnings": open(
-            os.path.join(temp_folder, "warnings.log"), "rt"
-            ).readlines()
-        }
+    spades_logs = {}
+    for k, fp in [
+        ("logs", "spades.log"),
+        ("params", "params.txt"),
+        ("warnings", "warnings.log")
+    ]:
+        fp = os.path.join(temp_folder, fp)
+        if os.path.exists(fp):
+            spades_logs[k] = open(fp, "rt").readlines()
 
     # Make an object with all of the results
     out = {
