@@ -109,8 +109,8 @@ def get_sra(accession, temp_folder):
     logging.info("No data was found on ENA, falling back to SRA")
     run_cmds([
         "fastq-dump",
-        "--outdir",
         "--split-files",
+        "--outdir",
         temp_folder, accession])
 
     # Local paths for each of the three possible file endings
