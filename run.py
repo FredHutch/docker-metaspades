@@ -425,15 +425,20 @@ if __name__ == "__main__":
     # Align each of the inputs and calculate the overall abundance
     for input_str in args.input.split(','):
         logging.info("Processing input argument: " + input_str)
+        # Make a new temp folder for just this sample
+        sample_temp_folder = os.path.join(temp_folder, str(uuid.uuid4()))
+        os.mkdir(sample_temp_folder)
         # Capture in a try statement
         try:
             run_metaspades(input_str,
                            args.output_folder,
                            threads=args.threads,
                            max_mem=args.max_mem,
-                           temp_folder=temp_folder,
+                           temp_folder=sample_temp_folder,
                            overwrite=args.overwrite,
                            interleaved=args.interleaved)
+            logging.info("Deleting temp folder {}".format(sample_temp_folder))
+            shutil.rmtree(sample_temp_folder)
         except:
             # There was some error
             # Capture the traceback
