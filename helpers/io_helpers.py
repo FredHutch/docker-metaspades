@@ -5,6 +5,25 @@ import logging
 from Bio.SeqIO.FastaIO import SimpleFastaParser
 
 
+def truncate_fasta_headers(fasta_fp, max_len):
+    """Truncate the headers in a FASTA file, modifying the file in place."""
+    assert os.path.exists(fasta_fp)
+    # Read in the FASTA information
+    with open(fasta_fp, "rt") as f:
+        fasta = [record for record in SimpleFastaParser(f)]
+
+    # Write out to the same file location
+    with open(fasta_fp, "wt") as fo:
+        for record in fasta:
+            header, seq = record
+            # Check the header length
+            if len(header) > max_len:
+                # Truncate
+                header = header[:max_len]
+            # Write out in FASTA format
+            fo.write(">{}\n{}\n".format(header, seq))
+
+
 def read_tsv(fp):
     """Read a TSV (with header) and format it as a list of dicts."""
     with open(fp, "rt") as f:

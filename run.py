@@ -12,7 +12,7 @@ import logging
 import argparse
 import traceback
 import subprocess
-from helpers.io_helpers import prokka_parser
+from helpers.io_helpers import prokka_parser, truncate_fasta_headers
 
 
 def run_cmds(commands, retry=0, catchExcept=False):
@@ -308,6 +308,9 @@ def run_metaspades(input_str,
     scaffold_fp = os.path.join(temp_folder, "scaffolds.fasta")
     assert os.path.exists(scaffold_fp)
     logging.info("Scaffolds written to {}".format(scaffold_fp))
+
+    # Truncate the contig headers, modifying file in place
+    truncate_fasta_headers(scaffold_fp, 37)
 
     # Run Prokka on the assembled scaffold sequences
     prokka_folder = os.path.join(temp_folder, "prokka")
