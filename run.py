@@ -190,25 +190,61 @@ def get_reads_from_url(input_str, temp_folder, interleaved=False):
 
 def return_results(out, read_prefix, output_folder, temp_folder):
     """Write out the final results as a JSON object and write them to the output folder."""
-    # Make a temporary file
-    temp_fp = os.path.join(temp_folder, read_prefix + '.json')
-    with open(temp_fp, 'wt') as fo:
-        json.dump(out, fo)
-    # Compress the output
-    run_cmds(['gzip', temp_fp])
-    temp_fp = temp_fp + '.gz'
 
+    # Keep a list of files that need to be copied
+    to_copy = []
+
+    # Make a temporary file for the JSON format data
+    json_temp_fp = os.path.join(temp_folder, read_prefix + '.json')
+    # Remember to copy this file
+    to_copy.append(json_temp_fp)
+    # Open up the file handle
+    with open(json_temp_fp, 'wt') as fo:
+        # Write out the JSON data
+        json.dump(out, fo)
+
+    # Write out the sequences and annotations as their own files
+    for entry_name, file_ending in [
+        ("gff", "gff"),
+        ("contigs", "fasta"),
+        ("proteins", "fastp"),
+        ("genbank", "gbk")
+    ]:
+        # Make a file path
+        temp_fp = os.path.join(temp_folder, read_prefix + '.' + file_ending)
+        # Remember to copy the file
+        to_copy.append(temp_fp)
+        # Open up the file path
+        with open(temp_fp, "wt") as fo:
+            # Write out each item in this list
+            for item in out["results"][entry_name]:
+                # Write out the contigs and proteins in FASTA format
+                if entry_name in ["contigs", "proteins"]:
+                    header, seq = item
+                    fo.write(">{}\n{}\n".format(header, seq))
+                # Everything else is written out straight
+                else:
+                    fo.write(item)
+
+    # Compress each of the files with GZIP
+    for fp in to_copy:
+        run_cmds(['gzip', fp])
+    to_copy = [s + ".gz" for s in to_copy]
+
+    # Write to S3
     if output_folder.startswith('s3://'):
-        # Copy to S3
-        run_cmds([
-            'aws', 's3', 'cp',
-            '--quiet', '--sse', 'AES256',
-            temp_fp, output_folder
-            ])
-        os.unlink(temp_fp)
+        for fp in to_copy:
+            run_cmds([
+                'aws', 's3', 'cp',
+                '--quiet', '--sse', 'AES256',
+                fp, output_folder
+                ])
+            os.unlink(fp)
+    # Copy to a local folder
     else:
         # Copy to local folder
-        run_cmds(['mv', temp_fp, output_folder])
+        for fp in to_copy:
+            run_cmds(['mv', fp, output_folder])
 
 
 def run_metaspades(input_str,

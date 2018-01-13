@@ -70,4 +70,11 @@ def prokka_parser(folder, prefix):
     with open(genbank_fp, "rt") as f:
         output["genbank"] = f.readlines()
 
+    # Also read in the GFF file
+    gff_fp = os.path.join(folder, prefix + ".gff")
+    assert os.path.exists(gff_fp)
+    logging.info("Reading in {}".format(gff_fp))
+    with open(gff_fp, "rt") as f:
+        output["gff"] = f.readlines()
+
     return output
