@@ -29,6 +29,12 @@
   [[ "$v" =~ "1.12" ]]
 }
 
+@test "tbl2asn" {
+
+  [[ "$( tbl2asn 2>&1 || true )" =~ "[tbl2asn]" ]]
+
+}
+
 @test "Make sure the run script is in the PATH" {
   h="$(run.py -h)"
 
