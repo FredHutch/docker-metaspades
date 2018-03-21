@@ -42,6 +42,14 @@ RUN mkdir /usr/prokka && \
 ENV PATH="/usr/prokka/prokka-1.12/bin:${PATH}"
 
 
+# Install tbl2asn
+RUN cd /usr/prokka && \
+	wget ftp://ftp.ncbi.nih.gov/toolbox/ncbi_tools/converters/by_program/tbl2asn/linux64.tbl2asn.gz && \
+	gunzip linux64.tbl2asn.gz && \
+	chmod +x linux64.tbl2asn && \
+	mv /usr/prokka/linux64.tbl2asn /usr/local/bin/tbl2asn
+
+
 # Add the run script to the PATH
 ADD run.py /usr/metaspades
 ADD helpers /usr/metaspades/helpers
