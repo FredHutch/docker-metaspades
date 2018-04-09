@@ -218,14 +218,14 @@ def get_reads_from_url(input_str, temp_folder, interleaved=False):
     return local_path, interleaved
 
 
-def return_results(out, read_prefix, output_folder, temp_folder):
+def return_results(out, sample_name, output_folder, temp_folder):
     """Write out the final results as a JSON object and write them to the output folder."""
 
     # Keep a list of files that need to be copied
     to_copy = []
 
     # Make a temporary file for the JSON format data
-    json_temp_fp = os.path.join(temp_folder, read_prefix + '.json')
+    json_temp_fp = os.path.join(temp_folder, sample_name + '.json')
     # Remember to copy this file
     to_copy.append(json_temp_fp)
     # Open up the file handle
@@ -241,7 +241,7 @@ def return_results(out, read_prefix, output_folder, temp_folder):
         ("genbank", "gbk")
     ]:
         # Make a file path
-        temp_fp = os.path.join(temp_folder, read_prefix + '.' + file_ending)
+        temp_fp = os.path.join(temp_folder, sample_name + '.' + file_ending)
         # Remember to copy the file
         to_copy.append(temp_fp)
         # Open up the file path
@@ -278,6 +278,7 @@ def return_results(out, read_prefix, output_folder, temp_folder):
 
 
 def run_metaspades(input_str,
+                   sample_name,
                    output_folder,
                    threads=16,
                    max_mem=240,
@@ -289,11 +290,8 @@ def run_metaspades(input_str,
     # Record the start time
     start_time = time.time()
 
-    # Use the read prefix to name the output and temporary files
-    read_prefix = input_str.split('/')[-1]
-
     # Check to see if the output already exists, if so, skip this sample
-    output_fp = output_folder.rstrip('/') + '/' + read_prefix + '.json.gz'
+    output_fp = output_folder.rstrip('/') + '/' + sample_name + '.json.gz'
     if output_fp.startswith('s3://'):
         # Check S3
         logging.info("Ensure that the output path doesn't already exist on S3")
@@ -386,7 +384,7 @@ def run_metaspades(input_str,
         "--outdir",
         prokka_folder,
         "--prefix",
-        read_prefix,
+        sample_name,
         "--cpus",
         str(threads),
         "--metagenome",
@@ -395,7 +393,7 @@ def run_metaspades(input_str,
 
     # Collect the results
     logging.info("Parsing the output")
-    output = prokka_parser(prokka_folder, read_prefix)
+    output = prokka_parser(prokka_folder, sample_name)
 
     # Read in the logs
     logging.info("Reading in the logs")
@@ -413,7 +411,7 @@ def run_metaspades(input_str,
     # Make an object with all of the results
     out = {
         "input_path": input_str,
-        "input": read_prefix,
+        "input": sample_name,
         "output_folder": output_folder,
         "logs": logs,
         "spades_logs": spades_logs,
@@ -423,7 +421,7 @@ def run_metaspades(input_str,
 
     # Write out the final results as a JSON object
     # and copy them to the output folder
-    return_results(out, read_prefix, output_folder, temp_folder)
+    return_results(out, sample_name, output_folder, temp_folder)
     logging.info("Done\n\n\n----------------\n\n\n")
 
 
@@ -434,10 +432,16 @@ if __name__ == "__main__":
 
     parser.add_argument("--input",
                         type=str,
+                        required=True,
                         help="""Location for input file(s). Comma-separated.
                                 (Supported: sra://, s3://, or ftp://).""")
+    parser.add_argument("--sample-name",
+                        type=str,
+                        required=True,
+                        help="""Prefix for output files.""")
     parser.add_argument("--output-folder",
                         type=str,
+                        required=True,
                         help="""Folder to place results.
                                 (Supported: s3://, or local path).""")
     parser.add_argument("--interleaved",
@@ -500,6 +504,7 @@ if __name__ == "__main__":
         # Capture in a try statement
         try:
             run_metaspades(input_str,
+                           args.sample_name,
                            args.output_folder,
                            threads=args.threads,
                            max_mem=args.max_mem,
