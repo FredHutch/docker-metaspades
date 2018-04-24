@@ -38,10 +38,11 @@ def read_tsv(fp):
                 else:
                     logging.info("Line too long, skipping")
                     logging.info("\t".join(line))
+    return output
 
 
-def prokka_parser(folder, prefix):
-    """Collect the set of results from prokka."""
+def output_file_parser(folder, prefix):
+    """Collect the set of results from a folder."""
     output = {}
 
     # Collect the FASTA records for contigs, transcripts, and proteins
@@ -51,30 +52,30 @@ def prokka_parser(folder, prefix):
         ("proteins", ".faa"),
     ]:
         filepath = os.path.join(folder, prefix + file_ending)
-        assert os.path.exists(filepath)
-        # Read in the FASTA
-        logging.info("Reading in {}".format(filepath))
-        records = [r for r in SimpleFastaParser(open(filepath, "rt"))]
-        output[tag] = records
+        if os.path.exists(filepath):
+            # Read in the FASTA
+            logging.info("Reading in {}".format(filepath))
+            records = [r for r in SimpleFastaParser(open(filepath, "rt"))]
+            output[tag] = records
 
     # Record the features from the TSV
     features_fp = os.path.join(folder, prefix + ".tsv")
-    assert os.path.exists(features_fp)
-    logging.info("Reading in {}".format(features_fp))
-    output["features"] = read_tsv(features_fp)
+    if os.path.exists(features_fp):
+        logging.info("Reading in {}".format(features_fp))
+        output["features"] = read_tsv(features_fp)
 
     # Also read in the Genbank file
     genbank_fp = os.path.join(folder, prefix + ".gbk")
-    assert os.path.exists(genbank_fp)
-    logging.info("Reading in {}".format(genbank_fp))
-    with open(genbank_fp, "rt") as f:
-        output["genbank"] = f.readlines()
+    if os.path.exists(genbank_fp):
+        logging.info("Reading in {}".format(genbank_fp))
+        with open(genbank_fp, "rt") as f:
+            output["genbank"] = f.readlines()
 
     # Also read in the GFF file
     gff_fp = os.path.join(folder, prefix + ".gff")
-    assert os.path.exists(gff_fp)
-    logging.info("Reading in {}".format(gff_fp))
-    with open(gff_fp, "rt") as f:
-        output["gff"] = f.readlines()
+    if os.path.exists(gff_fp):
+        logging.info("Reading in {}".format(gff_fp))
+        with open(gff_fp, "rt") as f:
+            output["gff"] = f.readlines()
 
     return output

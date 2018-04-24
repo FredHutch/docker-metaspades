@@ -40,3 +40,15 @@
 
   [[ "$h" =~ "Assemble a set of reads using metaSPAdes" ]]
 }
+
+@test "Make sure the run script for metaSPAdes is in the PATH" {
+  h="$(run_metaspades.py -h)"
+
+  [[ "$h" =~ "Assemble a set of reads using metaSPAdes" ]]
+}
+
+@test "Make sure the run script for Prokka is in the PATH" {
+  h="$(run_prokka.py -h)"
+
+  [[ "$h" =~ "Annotate an assembly using Prokka" ]]
+}

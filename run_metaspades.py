@@ -1,5 +1,5 @@
 #!/usr/bin/python
-"""Assemble a set of reads with metaSPAdes and annotate that assembly with Prokka."""
+"""Assemble a set of reads with metaSPAdes."""
 
 import os
 import sys
@@ -12,7 +12,8 @@ import logging
 import argparse
 import traceback
 import subprocess
-from helpers.io_helpers import output_file_parser, truncate_fasta_headers
+from Bio.SeqIO.FastaIO import SimpleFastaParser
+from helpers.io_helpers import truncate_fasta_headers
 
 
 def run_cmds(commands, retry=0, catchExcept=False):
@@ -225,7 +226,7 @@ def return_results(out, sample_name, output_folder, temp_folder):
     to_copy = []
 
     # Make a temporary file for the JSON format data
-    json_temp_fp = os.path.join(temp_folder, sample_name + '.json')
+    json_temp_fp = os.path.join(temp_folder, sample_name + '.metaspades.json')
     # Remember to copy this file
     to_copy.append(json_temp_fp)
     # Open up the file handle
@@ -235,10 +236,7 @@ def return_results(out, sample_name, output_folder, temp_folder):
 
     # Write out the sequences and annotations as their own files
     for entry_name, file_ending in [
-        ("gff", "gff"),
         ("contigs", "fasta"),
-        ("proteins", "fastp"),
-        ("genbank", "gbk")
     ]:
         # Make a file path
         temp_fp = os.path.join(temp_folder, sample_name + '.' + file_ending)
@@ -380,25 +378,6 @@ def run_metaspades(input_str,
     # Truncate the contig headers, modifying file in place
     truncate_fasta_headers(scaffold_fp, 37)
 
-    # Run Prokka on the assembled scaffold sequences
-    prokka_folder = os.path.join(temp_folder, "prokka")
-    logging.info("Running Prokka")
-    run_cmds([
-        "prokka",
-        "--outdir",
-        prokka_folder,
-        "--prefix",
-        sample_name,
-        "--cpus",
-        str(threads),
-        "--metagenome",
-        scaffold_fp
-        ])
-
-    # Collect the results
-    logging.info("Parsing the output")
-    output = output_file_parser(prokka_folder, sample_name)
-
     # Read in the logs
     logging.info("Reading in the logs")
     logs = open(log_fp, 'rt').readlines()
@@ -412,14 +391,21 @@ def run_metaspades(input_str,
         if os.path.exists(fp):
             spades_logs[k] = open(fp, "rt").readlines()
 
+    # Collect the results
+    logging.info("Parsing the output")
+    with open(scaffold_fp, "rt") as f:
+        output = {
+            "contigs": [r for r in SimpleFastaParser(f)]
+        }
+
     # Make an object with all of the results
     out = {
         "input_path": input_str,
         "input": sample_name,
         "output_folder": output_folder,
         "logs": logs,
-        "spades_logs": spades_logs,
         "results": output,
+        "spades_logs": spades_logs,
         "time_elapsed": time.time() - start_time
     }
 
@@ -429,10 +415,10 @@ def run_metaspades(input_str,
     logging.info("Done")
     logging.info("")
     logging.info("")
-    logging.info("--------------")
+    logging.info("----------------------")
     logging.info("")
     logging.info("")
-    logging.info("")
+
 
 
 if __name__ == "__main__":
@@ -492,7 +478,7 @@ if __name__ == "__main__":
 
     # Set up logging
     log_fp = '{}/log.txt'.format(temp_folder)
-    logFormatter = logging.Formatter('%(asctime)s %(levelname)-8s [run.py] %(message)s')
+    logFormatter = logging.Formatter('%(asctime)s %(levelname)-8s [run_metaspades.py] %(message)s')
     rootLogger = logging.getLogger()
     rootLogger.setLevel(logging.INFO)
 
@@ -505,7 +491,6 @@ if __name__ == "__main__":
     consoleHandler.setFormatter(logFormatter)
     rootLogger.addHandler(consoleHandler)
 
-    # Align each of the inputs and calculate the overall abundance
     for input_str in args.input.split(','):
         logging.info("Processing input argument: " + input_str)
         # Make a new temp folder for just this sample

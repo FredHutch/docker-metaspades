@@ -52,10 +52,13 @@ RUN cd /usr/prokka && \
 
 # Add the run script to the PATH
 ADD run.py /usr/metaspades
+ADD run_metaspades.py /usr/metaspades
+ADD run_prokka.py /usr/metaspades
 ADD helpers /usr/metaspades/helpers
 RUN cd /usr/metaspades && \
-	chmod +x run.py && \
-	ln -s /usr/metaspades/run.py /usr/bin/
+	ln -s /usr/metaspades/run.py /usr/bin/ && \
+	ln -s /usr/metaspades/run_metaspades.py /usr/bin/ && \
+	ln -s /usr/metaspades/run_prokka.py /usr/bin/
 
 
 # Run tests and then remove the folder
