@@ -10,6 +10,9 @@ RUN apt update && \
 RUN mkdir /share
 WORKDIR /share
 
+# Add /scratch
+RUN mkdir /scratch
+
 # Add files
 RUN mkdir /usr/metaspades
 ADD requirements.txt /usr/metaspades
