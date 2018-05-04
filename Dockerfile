@@ -20,6 +20,9 @@ ADD requirements.txt /usr/metaspades
 # Install python requirements
 RUN pip install -r /usr/metaspades/requirements.txt && rm /usr/metaspades/requirements.txt
 
+# Add the bucket command wrapper, used to run code via sciluigi
+RUN apt-get install -y python3-pip
+RUN pip3 install bucket_command_wrapper==0.2.0 
 
 # Install the SRA toolkit
 RUN cd /usr/local/bin && \
