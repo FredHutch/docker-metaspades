@@ -237,6 +237,10 @@ if __name__ == "__main__":
     # Check that the temporary folder exists
     assert os.path.exists(args.temp_folder)
 
+    # Make sure the output folder ends with "/"
+    if args.output_folder.endswith("/") is False:
+        args.output_folder = args.output_folder + "/"
+
     # Set a random string, which will be appended to all temporary files
     random_string = str(uuid.uuid4())[:8]
 
