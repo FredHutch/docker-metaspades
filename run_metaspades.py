@@ -282,8 +282,11 @@ def run_metaspades(input_str,
                    max_mem=240,
                    temp_folder='/mnt/temp',
                    overwrite=False,
+                   phred_offset=33,
                    interleaved=False):
     """Assemble a set of reads using metaSPAdes."""
+
+    assert phred_offset in [33, 64], "PHRED offset must be 33 or 64"
 
     # Record the start time
     start_time = time.time()
@@ -344,6 +347,8 @@ def run_metaspades(input_str,
                 "-2", r2_fp,         # Reverse read
                 "-o", temp_folder,   # Output folder
                 "-t", str(threads),  # Threads
+                "--phred-offset",    # PHRED offset, 33 or 64
+                str(phred_offset),
                 "-m", str(max_mem)   # Maximum memory used
                 ])
         else:
@@ -354,6 +359,8 @@ def run_metaspades(input_str,
                 "--12", read_fp,     # Interleaved forward and reverse reads
                 "-o", temp_folder,   # Output folder
                 "-t", str(threads),  # Threads
+                "--phred-offset",    # PHRED offset, 33 or 64
+                str(phred_offset),
                 "-m", str(max_mem)   # Maximum memory used
                 ])
     else:
@@ -366,6 +373,8 @@ def run_metaspades(input_str,
             "-s", read_fp,       # Single-end reads file
             "-o", temp_folder,   # Output folder
             "-t", str(threads),  # Threads
+            "--phred-offset",    # PHRED offset, 33 or 64
+            str(phred_offset),
             "-m", str(max_mem)   # Maximum memory used
             ])
     logging.info("Done with assembly")
