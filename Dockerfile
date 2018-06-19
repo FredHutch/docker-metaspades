@@ -51,11 +51,11 @@ ENV PATH="/usr/prokka/prokka-1.12/bin:${PATH}"
 RUN mkdir /src/
 WORKDIR /src
 RUN git clone https://github.com/tseemann/barrnap
-WORKDIR /src/barnnap
+WORKDIR /src/barrnap
 RUN git checkout tags/0.9 && \
 	cp /src/barrnap/bin/barrnap /usr/local/bin/barrnap && \
 	mkdir -p /usr/local/db/ && \
-	cp /src/barrnap/db/* /usr/local/db/ && \
+	cp /src/barrnap/db/* /usr/local/db/
 WORKDIR /share
 RUN rm -r /src/barrnap
 
