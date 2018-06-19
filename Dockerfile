@@ -47,6 +47,17 @@ RUN mkdir /usr/prokka && \
 	prokka-1.12/bin/prokka --setupdb
 ENV PATH="/usr/prokka/prokka-1.12/bin:${PATH}"
 
+# Install barrnap (for rRNA detection in Prokka)
+RUN mkdir /src/
+WORKDIR /src
+RUN git clone https://github.com/tseemann/barrnap
+WORKDIR /src/barnnap
+RUN git checkout tags/0.9 && \
+	cp /src/barrnap/bin/barrnap /usr/local/bin/barrnap && \
+	mkdir -p /usr/local/db/ && \
+	cp /src/barrnap/db/* /usr/local/db/ && \
+WORKDIR /share
+RUN rm -r /src/barrnap
 
 # Install tbl2asn
 RUN cd /usr/prokka && \
