@@ -25,7 +25,7 @@ is the SRA accession (if specified), or otherwise the prefix of the input file f
 
 #### --interleaved
 
-Treat the input data as interleaved by default. This is not considered when you provide
+Specify TRUE or FALSE to treat the input data as interleaved or not. This is not considered when you provide
 an SRA accession, as the paired-end nature of the data is guessed automatically.
 
 #### --threads
