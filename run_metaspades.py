@@ -450,7 +450,8 @@ if __name__ == "__main__":
                         help="""Folder to place results.
                                 (Supported: s3://, or local path).""")
     parser.add_argument("--interleaved",
-                        action="store_true",
+                        default=False,
+                        type=bool,
                         help="""Treat input as interleaved by default \
                                 (ignored for SRA datasets).""")
     parser.add_argument("--overwrite",
