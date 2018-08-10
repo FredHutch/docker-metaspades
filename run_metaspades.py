@@ -450,10 +450,10 @@ if __name__ == "__main__":
                         help="""Folder to place results.
                                 (Supported: s3://, or local path).""")
     parser.add_argument("--interleaved",
-                        default=False,
-                        type=bool,
+                        default="False",
+                        type=str,
                         help="""Treat input as interleaved by default \
-                                (ignored for SRA datasets).""")
+                                (ignored for SRA datasets) (True / False).""")
     parser.add_argument("--overwrite",
                         action="store_true",
                         help="""Overwrite output files. Off by default.""")
@@ -471,6 +471,10 @@ if __name__ == "__main__":
                         help="Folder used for temporary files.")
 
     args = parser.parse_args()
+
+    # Convert 'interleaved' to a bool
+    assert args.interleaved in ["True", "False"],  "--interleaved must be True or False"
+    args.interleaved = args.interleaved == "True"
 
     # Check that the temporary folder exists
     assert os.path.exists(args.temp_folder)
